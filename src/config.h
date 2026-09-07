@@ -1,0 +1,5 @@
+
+#define MAX_TRACKS 17
+#define MAX_TRACK_EVENTS 200
+#define MAX_METADATA_LENGTH 150
+
