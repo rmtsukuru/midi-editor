@@ -2,6 +2,7 @@
 
 #include "src/struct.h"
 #include "src/file_input.h"
+#include "src/file_output.h"
 #include "src/output.h"
 
 int display_midi_file(char* filename) {
@@ -14,6 +15,7 @@ int display_midi_file(char* filename) {
 
     MidiFile data;
     load_midi_file(file, &data);
+    fclose(file);
 
     print_header_chunk(&data.header);
     for (int i = 0; i < data.header.track_count; i++) {
@@ -30,7 +32,12 @@ int create_midi_file() {
     printf("What is the name for this file?\n>");
     char filename[100];
     scanf(" %s", filename);
-    // TODO implement the rest of this
+    FILE* file = fopen(filename, "w");
+    MidiFile* data;
+    load_default_midi_data(data);
+    save_midi_file(file, data);
+    fclose(file);
+    printf("Saved file %s to disk.\n", filename);
 
     return 0;
 }
