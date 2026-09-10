@@ -11,3 +11,10 @@ int load_bytes(byte* bytes, int len) {
     return x;
 }
 
+void write_bytes(byte* bytes, int value, int len) {
+    for (int i = 0; i < len; i++) {
+        int offset = len - 1 - i;
+        bytes[i] = value << (8 * offset);
+    }
+}
+

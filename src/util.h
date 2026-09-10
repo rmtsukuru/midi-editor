@@ -5,5 +5,7 @@
 
 int load_bytes(byte* bytes, int len);
 
+void write_bytes(byte* bytes, int value, int len);
+
 #endif
 

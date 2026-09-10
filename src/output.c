@@ -99,10 +99,16 @@ void print_track_chunk(Track* track, byte track_number) {
 
 void print_hex_data(FILE* file) {
     byte buffer[8];
-    while(fread(buffer, sizeof(buffer), 1, file)) {
-        for (int i = 0; i < sizeof(buffer); i++) {
+    int len;
+    while(len = fread(buffer, 1, sizeof(buffer), file)) {
+        for (int i = 0; i < len; i++) {
             printf("%02X ", buffer[i]);
         }
+        printf("\"");
+        for (int i = 0; i < len; i++) {
+            printf("%c", buffer[i]);
+        }
+        printf("\" ");
         printf("\n");
     }
 }

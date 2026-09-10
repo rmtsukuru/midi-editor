@@ -5,6 +5,17 @@
 #include "src/file_output.h"
 #include "src/output.h"
 
+int display_hex_contents(char* filename) {
+    FILE* file = fopen(filename, "rb");
+
+    if (file == NULL) {
+        printf("Could not load file; most likely invalid filename.\n");
+        return -1;
+    }
+
+    print_hex_data(file);
+}
+
 int display_midi_file(char* filename) {
     FILE* file = fopen(filename, "rb");
 
@@ -33,9 +44,9 @@ int create_midi_file() {
     char filename[100];
     scanf(" %s", filename);
     FILE* file = fopen(filename, "w");
-    MidiFile* data;
-    load_default_midi_data(data);
-    save_midi_file(file, data);
+    MidiFile data;
+    load_default_midi_data(&data);
+    save_midi_file(file, &data);
     fclose(file);
     printf("Saved file %s to disk.\n", filename);
 
@@ -43,7 +54,9 @@ int create_midi_file() {
 }
 
 int main(int argc, char** argv) {
-    if (argc > 1) {
+    if (argc > 2) {
+        return display_hex_contents(argv[1]);
+    } else if (argc > 1) {
         return display_midi_file(argv[1]);
     }
 
