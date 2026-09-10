@@ -5,7 +5,7 @@
 
 void load_default_midi_data(MidiFile* contents);
 
-void save_midi_file(FILE* file, MidiFile* contents);
+int save_midi_file(FILE* file, MidiFile* contents);
 
 #endif
 

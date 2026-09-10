@@ -46,9 +46,9 @@ int create_midi_file() {
     FILE* file = fopen(filename, "w");
     MidiFile data;
     load_default_midi_data(&data);
-    save_midi_file(file, &data);
+    int byte_count = save_midi_file(file, &data);
     fclose(file);
-    printf("Saved file %s to disk.\n", filename);
+    printf("Saved file %s to disk (%d bytes).\n", filename, byte_count);
 
     return 0;
 }
