@@ -277,12 +277,13 @@ char* get_instrument_name(byte program_number) {
 }
 
 void load_default_midi_data(MidiFile* contents) {
+    const int ticks = 48;
     Header* header = &contents->header;
     strcpy(header->chunk_type, "MThd");
     header->length = 6;
     header->format = 1;
     header->track_count = 1;
-    header->division = 96;
+    header->division = ticks;
 
     Track* track = &contents->tracks[0];
     strcpy(track->chunk_type, "MTrk");
@@ -300,7 +301,7 @@ void load_default_midi_data(MidiFile* contents) {
     events[1].value1 = 71; // B4
     events[1].value2 = 64;
 
-    events[2].delta_time = 192;             // 5 bytes
+    events[2].delta_time = ticks * 2;       // 4 bytes
     events[2].type = NOTE_ON;
     events[2].type_code = 0x90;
     events[2].value1 = 69; // A4
@@ -312,7 +313,7 @@ void load_default_midi_data(MidiFile* contents) {
     events[3].value1 = 71; // B4
     events[3].value2 = 64;
 
-    events[4].delta_time = 192;             // 5 bytes
+    events[4].delta_time = ticks * 2;       // 4 bytes
     events[4].type = NOTE_ON;
     events[4].type_code = 0x90;
     events[4].value1 = 65; // F4
@@ -324,7 +325,7 @@ void load_default_midi_data(MidiFile* contents) {
     events[5].value1 = 69; // A4
     events[5].value2 = 64;
 
-    events[6].delta_time = 192;             // 5 bytes
+    events[6].delta_time = ticks * 2;       // 4 bytes
     events[6].type = NOTE_OFF;
     events[6].type_code = 0x80;
     events[6].value1 = 65; // F4
@@ -338,6 +339,6 @@ void load_default_midi_data(MidiFile* contents) {
     events[7].meta_length = 0;
 
     track->events_length = 8;
-    track->length = 34;                     // 34 bytes total
+    track->length = 31;                     // 31 bytes total
 }
 
