@@ -3,3 +3,6 @@
 #define MAX_TRACK_EVENTS 200
 #define MAX_METADATA_LENGTH 150
 
+#define MAX_NOTES 200
+#define MAX_CHORD_NOTES 7
+

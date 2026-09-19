@@ -276,69 +276,83 @@ char* get_instrument_name(byte program_number) {
     return instruments[program_number];
 }
 
+void load_default_song_data(MidiSong* song) {
+    MidiConfig* config = &song->config;
+    config->track_count = 1;
+    // TODO add more to this (like time sig) later
+
+    SongTrack* track = &song->tracks[0];
+    track->instrument = 0; // Grand Piano
+    track->note_count = 6;
+    
+    SongEvent* events = track->notes;
+    events[0].note = (Note){71, QUARTER, false};    // B4
+    events[1].note = (Note){69, QUARTER, false};    // A4
+    events[2].note = (Note){65, QUARTER, false};    // F4
+
+    events[3].note = (Note){71, QUARTER, false};    // B4
+    events[4].note = (Note){69, QUARTER, false};    // A4
+    events[5].note = (Note){65, QUARTER, false};    // F4
+}
+
 void load_default_midi_data(MidiFile* contents) {
+    MidiSong song;
+    MidiSong* song_data = &song;
+    load_default_song_data(song_data);
+
     const int ticks = 48;
     Header* header = &contents->header;
+    MidiConfig* config = &song_data->config;
     strcpy(header->chunk_type, "MThd");
     header->length = 6;
     header->format = 1;
-    header->track_count = 1;
+    header->track_count = config->track_count;
     header->division = ticks;
 
-    Track* track = &contents->tracks[0];
-    strcpy(track->chunk_type, "MTrk");
+    for (int i = 0; i < header->track_count; i++) {
+        Track* track = &contents->tracks[i];
+        SongTrack* song_track = &song_data->tracks[i];
+        strcpy(track->chunk_type, "MTrk");
 
-    // Track events
-    TrackEvent* events = track->events;
-    events[0].delta_time = 0;               // 3 bytes
-    events[0].type = PROGRAM_CHANGE;
-    events[0].type_code = 0xC0;
-    events[0].value1 = 0; // Grand Piano
+        int track_bytes = 0;
 
-    events[1].delta_time = 0;               // 4 bytes
-    events[1].type = NOTE_ON;
-    events[1].type_code = 0x90;
-    events[1].value1 = 71; // B4
-    events[1].value2 = 64;
+        // Track events
+        TrackEvent* events = track->events;
+        events[0].delta_time = 0;
+        events[0].type = PROGRAM_CHANGE;
+        events[0].type_code = 0xC0;
+        events[0].value1 = song_track->instrument;
+        track_bytes += 3;
 
-    events[2].delta_time = ticks * 2;       // 4 bytes
-    events[2].type = NOTE_ON;
-    events[2].type_code = 0x90;
-    events[2].value1 = 69; // A4
-    events[2].value2 = 64;
+        for (int n = 0; n < song_track->note_count; n++) {
+            Note* note = &song_track->notes[n].note;
+            // TODO add support for rests and chords here later
+            events[1 + 2 * n].delta_time = 0;
+            events[1 + 2 * n].type = NOTE_ON;
+            events[1 + 2 * n].type_code = 0x90;
+            events[1 + 2 * n].value1 = note->value;
+            events[1 + 2 * n].value2 = 64;
+            track_bytes += 4;
 
-    events[3].delta_time = 0;               // 4 bytes
-    events[3].type = NOTE_OFF;
-    events[3].type_code = 0x80;
-    events[3].value1 = 71; // B4
-    events[3].value2 = 64;
+            events[2 + 2 * n].delta_time = ticks * 2;
+            // TODO adjust delta time based on note frequency
+            events[2 + 2 * n].type = NOTE_OFF;
+            events[2 + 2 * n].type_code = 0x80;
+            events[2 + 2 * n].value1 = note->value;
+            events[2 + 2 * n].value2 = 64;
+            track_bytes += 4;
+        }
 
-    events[4].delta_time = ticks * 2;       // 4 bytes
-    events[4].type = NOTE_ON;
-    events[4].type_code = 0x90;
-    events[4].value1 = 65; // F4
-    events[4].value2 = 64;
+        events[1 + 2 * song_track->note_count].delta_time = 0;
+        events[1 + 2 * song_track->note_count].type = META_EVENT;
+        events[1 + 2 * song_track->note_count].type_code = 0xFF;
+        events[1 + 2 * song_track->note_count].meta_type = END_OF_TRACK;
+        events[1 + 2 * song_track->note_count].meta_type_code = 0x2F;
+        events[1 + 2 * song_track->note_count].meta_length = 0;
+        track_bytes += 4;
 
-    events[5].delta_time = 0;               // 4 bytes
-    events[5].type = NOTE_OFF;
-    events[5].type_code = 0x80;
-    events[5].value1 = 69; // A4
-    events[5].value2 = 64;
-
-    events[6].delta_time = ticks * 2;       // 4 bytes
-    events[6].type = NOTE_OFF;
-    events[6].type_code = 0x80;
-    events[6].value1 = 65; // F4
-    events[6].value2 = 64;
-
-    events[7].delta_time = 0;               // 4 bytes
-    events[7].type = META_EVENT;
-    events[7].type_code = 0xFF;
-    events[7].meta_type = END_OF_TRACK;
-    events[7].meta_type_code = 0x2F;
-    events[7].meta_length = 0;
-
-    track->events_length = 8;
-    track->length = 31;                     // 31 bytes total
+        track->events_length = 2 * song_track->note_count + 2;
+        track->length = track_bytes;
+    }
 }
 

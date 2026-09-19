@@ -3,6 +3,13 @@
 
 #include "config.h"
 
+#define TRUE 1
+#define FALSE 0
+#define true TRUE
+#define false FALSE
+
+typedef unsigned char bool;
+
 typedef unsigned char byte;
 
 typedef enum {
@@ -69,6 +76,60 @@ typedef struct {
     Header header;
     Track tracks[MAX_TRACKS]; // See length in header.track_count
 } MidiFile;
+
+// Song Data
+typedef enum {
+    SIXTY_FOURTH,
+    THIRTY_SECOND,
+    SIXTEENTH,
+    EIGHTH,
+    QUARTER,
+    HALF,
+    WHOLE,
+    DOUBLE,
+    TRIPLE,
+    QUADRUPLE
+} Frequency;
+
+typedef struct {
+    byte value;
+    Frequency frequency;
+    bool dotted;
+} Note;
+
+typedef struct {
+    Frequency frequency;
+    bool dotted;
+} Rest;
+
+typedef struct {
+    byte note_values[MAX_CHORD_NOTES];
+    byte chord_note_count;
+    Frequency frequency;
+    bool dotted;
+} Chord;
+
+typedef union {
+    Note note;
+    Rest rest;
+    Chord chord;
+} SongEvent;
+
+typedef struct {
+    byte instrument;
+    byte note_count;
+    SongEvent notes[MAX_NOTES];
+} SongTrack;
+
+typedef struct {
+    int track_count;
+    // TODO: add support for different time signatures
+} MidiConfig;
+
+typedef struct {
+    MidiConfig config;
+    SongTrack tracks[MAX_TRACKS];
+} MidiSong;
 
 #endif
 
