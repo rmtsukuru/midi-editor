@@ -109,10 +109,21 @@ typedef struct {
     bool dotted;
 } Chord;
 
+typedef enum {
+    NOTE,
+    REST,
+    CHORD
+} SongEventType;
+
 typedef union {
     Note note;
     Rest rest;
     Chord chord;
+} SongEventData;
+
+typedef struct {
+    SongEventData data;
+    SongEventType type;
 } SongEvent;
 
 typedef struct {
