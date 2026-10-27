@@ -322,7 +322,7 @@ void load_default_song_data(MidiSong* song) {
         events[6].data.note = (Note){48, QUARTER, false};    // C4
         events[7].data.note = (Note){52, HALF, false};       // E4
 
-        events[8].data.rest = (Rest){HALF, false};
+        events[8].data.rest = (Rest){WHOLE, false};
         events[8].type = REST;
         break;
     }
@@ -417,13 +417,13 @@ void load_default_midi_data(MidiFile* contents) {
             }
         }
 
-        events[1 + 2 * song_track->note_count].delta_time = rest_counter;
+        events[1 + 2 * n].delta_time = rest_counter;
         rest_counter = 0;
-        events[1 + 2 * song_track->note_count].type = META_EVENT;
-        events[1 + 2 * song_track->note_count].type_code = 0xFF;
-        events[1 + 2 * song_track->note_count].meta_type = END_OF_TRACK;
-        events[1 + 2 * song_track->note_count].meta_type_code = 0x2F;
-        events[1 + 2 * song_track->note_count].meta_length = 0;
+        events[1 + 2 * n].type = META_EVENT;
+        events[1 + 2 * n].type_code = 0xFF;
+        events[1 + 2 * n].meta_type = END_OF_TRACK;
+        events[1 + 2 * n].meta_type_code = 0x2F;
+        events[1 + 2 * n].meta_length = 0;
         track_bytes += 4;
 
         track->events_length = 2 * n + 2;
