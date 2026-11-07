@@ -102,8 +102,8 @@ int load_meta_event(FILE* file, TrackEvent* event) {
             // 4 bytes used to specify a time signature
             // Numerator
             // Denominator (negative power of 2, so 2 is a quarter note)
-            // Number of MIDI clocks in a metronome click (typically 24 or 0x18
-            // Number of 32nd notes per quarter note (24 MIDI clocks), typically 8
+            // Number of MIDI clocks in a metronome click (typically 24 or 0x18)
+            // Number of 32nd notes per quarter note (24 MIDI clocks), typically 8)
             fread(event->metadata, 4, 1, file);
             bytes_read += 4;
             break;
