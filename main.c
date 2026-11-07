@@ -44,6 +44,12 @@ int create_midi_file() {
     char filename[100];
     scanf(" %s", filename);
     FILE* file = fopen(filename, "w");
+
+    if (file == NULL) {
+        printf("Could not open file for writing; most likely invalid filename.\n");
+        return -1;
+    }
+
     MidiFile data;
     load_default_midi_data(&data);
     int byte_count = save_midi_file(file, &data);
