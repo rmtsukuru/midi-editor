@@ -54,7 +54,14 @@ int write_meta_event(FILE* file, TrackEvent* event) {
     putc(event->meta_type_code, file);
     byte_count += write_variable_length_value(file, event->meta_length);
 
-    // TODO handle other meta events besides end of track
+    // TODO handle other meta events besides end of track and time sig
+    if (event->meta_type == TIME_SIGNATURE || event->meta_type == SET_TEMPO) {
+        // Actually, can we do this for loop for all meta events? Hmmm...
+        for (int i = 0; i < event->meta_length; i++) {
+            putc(event->metadata[i], file);
+            byte_count++;
+        }
+    }
 
     return byte_count;
 }

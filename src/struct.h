@@ -134,7 +134,11 @@ typedef struct {
 
 typedef struct {
     int track_count;
-    // TODO: add support for different time signatures
+    int tempo; // In BPM
+    int time_sig_count;
+    int time_sig_unit;
+    // TODO: add support for other config information
+    // different key signatures or something, I guess?
 } MidiConfig;
 
 typedef struct {

@@ -1,4 +1,5 @@
 #include <string.h>
+#include <math.h>
 
 #include "struct.h"
 #include "music.h"
@@ -279,6 +280,9 @@ char* get_instrument_name(byte program_number) {
 void load_default_song_data(MidiSong* song) {
     MidiConfig* config = &song->config;
     config->track_count = 1;
+    config->tempo = 70;
+    config->time_sig_count = 4; // for 4/4 time
+    config->time_sig_unit = 2; // 2^-2 = 1/4 (quarter note)
     SongTrack* track = &song->tracks[0];
     SongEvent* events = track->notes;
     // TODO add more to this (like time sig and tempo) later
@@ -287,6 +291,7 @@ void load_default_song_data(MidiSong* song) {
    
     switch (song_number) {
     case 0:
+        config->time_sig_count = 3; // for 3/4 time
         track->instrument = 0; // Grand Piano
         track->note_count = 6;
 
@@ -294,36 +299,34 @@ void load_default_song_data(MidiSong* song) {
             events[i].type = NOTE;
         }
 
-        events[0].data.note = (Note){71, QUARTER, false};    // B4
-        events[1].data.note = (Note){69, QUARTER, false};    // A4
-        events[2].data.note = (Note){65, QUARTER, false};    // F4
+        events[0].data.note = (Note){71, QUARTER, false};   // B4
+        events[1].data.note = (Note){69, QUARTER, false};   // A4
+        events[2].data.note = (Note){65, QUARTER, false};   // F4
 
-        events[3].data.note = (Note){71, QUARTER, false};    // B4
-        events[4].data.note = (Note){69, QUARTER, false};    // A4
-        events[5].data.note = (Note){65, QUARTER, false};    // F4
+        events[3].data.note = (Note){71, QUARTER, false};   // B4
+        events[4].data.note = (Note){69, QUARTER, false};   // A4
+        events[5].data.note = (Note){65, QUARTER, false};   // F4
         break;
     case 1:
+        config->tempo = 240;
         track->instrument = 32; // Acoustic Bass
-        track->note_count = 9;
+        track->note_count = 8;
 
         for (int i = 0; i < track->note_count; i++) {
             events[i].type = NOTE;
         }
 
-        events[0].data.note = (Note){48, QUARTER, false};    // C3
-        events[1].data.note = (Note){48, QUARTER, false};    // C3
-        events[2].data.note = (Note){52, QUARTER, false};    // E3
-        events[3].data.note = (Note){48, QUARTER, false};    // C4
+        events[0].data.note = (Note){48, EIGHTH, false};    // C3
+        events[1].data.note = (Note){48, EIGHTH, false};    // C3
+        events[2].data.note = (Note){52, EIGHTH, false};    // E3
+        events[3].data.note = (Note){48, EIGHTH, false};    // C4
 
-        events[4].data.rest = (Rest){QUARTER, false};
-        events[4].type = REST;
+        events[4].data.note = (Note){48, EIGHTH, false};    // C4
+        events[5].data.note = (Note){48, EIGHTH, false};    // C4
+        events[6].data.note = (Note){52, QUARTER, false};   // E4
 
-        events[5].data.note = (Note){48, QUARTER, false};    // C4
-        events[6].data.note = (Note){48, QUARTER, false};    // C4
-        events[7].data.note = (Note){52, HALF, false};       // E4
-
-        events[8].data.rest = (Rest){WHOLE, false};
-        events[8].type = REST;
+        events[7].data.rest = (Rest){HALF, false};
+        events[7].type = REST;
         break;
     }
 }
@@ -381,6 +384,31 @@ void load_default_midi_data(MidiFile* contents) {
         events[0].value1 = song_track->instrument;
         track_bytes += 3;
 
+        events[1].delta_time = 0;
+        events[1].type = META_EVENT;
+        events[1].type_code = 0xFF;
+        events[1].meta_type = TIME_SIGNATURE;
+        events[1].meta_type_code = 0x58;
+        events[1].meta_length = 4;
+        events[1].metadata[0] = config->time_sig_count;
+        events[1].metadata[1] = config->time_sig_unit;
+        events[1].metadata[2] = 24;
+        events[1].metadata[3] = 8;
+        track_bytes += 8;
+
+        events[2].delta_time = 0;
+        events[2].type = META_EVENT;
+        events[2].type_code = 0xFF;
+        events[2].meta_type = SET_TEMPO;
+        events[2].meta_type_code = 0x51;
+        events[2].meta_length = 3;
+        // Microseconds per beat (because MIDI is very precise)
+        int us_per_beat = round(1000000 / (config->tempo / 60));
+        events[2].metadata[0] = (us_per_beat & 0xFF0000) >> 16;
+        events[2].metadata[1] = (us_per_beat & 0x00FF00) >> 8;
+        events[2].metadata[2] = us_per_beat & 0x0000FF;
+        track_bytes += 7;
+
         int rest_counter = 0;
 
         int n = 0;
@@ -388,23 +416,23 @@ void load_default_midi_data(MidiFile* contents) {
             // TODO add support for chords here later
             if (song_track->notes[i].type == NOTE) {
                 Note* note = &song_track->notes[i].data.note;
-                events[1 + 2 * n].delta_time = rest_counter;
+                events[3 + 2 * n].delta_time = rest_counter;
                 rest_counter = 0;
-                events[1 + 2 * n].type = NOTE_ON;
-                events[1 + 2 * n].type_code = 0x90;
-                events[1 + 2 * n].value1 = note->value;
-                events[1 + 2 * n].value2 = 64;
+                events[3 + 2 * n].type = NOTE_ON;
+                events[3 + 2 * n].type_code = 0x90;
+                events[3 + 2 * n].value1 = note->value;
+                events[3 + 2 * n].value2 = 64;
                 track_bytes += 4;
 
                 int tick_count = get_tick_count_from_frequency(ticks, note->frequency);
                 if (note->dotted) {
                     tick_count += tick_count / 2;
                 }
-                events[2 + 2 * n].delta_time = tick_count;
-                events[2 + 2 * n].type = NOTE_OFF;
-                events[2 + 2 * n].type_code = 0x80;
-                events[2 + 2 * n].value1 = note->value;
-                events[2 + 2 * n].value2 = 64;
+                events[4 + 2 * n].delta_time = tick_count;
+                events[4 + 2 * n].type = NOTE_OFF;
+                events[4 + 2 * n].type_code = 0x80;
+                events[4 + 2 * n].value1 = note->value;
+                events[4 + 2 * n].value2 = 64;
                 track_bytes += 4;
                 n++;
             } else if (song_track->notes[i].type == REST) {
@@ -417,16 +445,16 @@ void load_default_midi_data(MidiFile* contents) {
             }
         }
 
-        events[1 + 2 * n].delta_time = rest_counter;
+        events[3 + 2 * n].delta_time = rest_counter;
         rest_counter = 0;
-        events[1 + 2 * n].type = META_EVENT;
-        events[1 + 2 * n].type_code = 0xFF;
-        events[1 + 2 * n].meta_type = END_OF_TRACK;
-        events[1 + 2 * n].meta_type_code = 0x2F;
-        events[1 + 2 * n].meta_length = 0;
+        events[3 + 2 * n].type = META_EVENT;
+        events[3 + 2 * n].type_code = 0xFF;
+        events[3 + 2 * n].meta_type = END_OF_TRACK;
+        events[3 + 2 * n].meta_type_code = 0x2F;
+        events[3 + 2 * n].meta_length = 0;
         track_bytes += 4;
 
-        track->events_length = 2 * n + 2;
+        track->events_length = 2 * n + 4;
         track->length = track_bytes;
     }
 }
