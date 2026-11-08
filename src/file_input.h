@@ -15,5 +15,7 @@ void load_track_chunk(FILE* file, Track* track);
 
 void load_midi_file(FILE* file, MidiFile* contents);
 
+void load_song_file(FILE* file, MidiSong* contents);
+
 #endif
 

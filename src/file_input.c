@@ -240,3 +240,16 @@ void load_midi_file(FILE* file, MidiFile* contents) {
     }
 }
 
+void load_song_file(FILE* file, MidiSong* contents) {
+    int track_count, time_sig_count, time_sig_unit, bpm;
+    fscanf(file, "%i %i/%i %i\n", &track_count, &time_sig_count, &time_sig_unit, &bpm);
+
+    MidiConfig* config = &contents->config;
+    config->track_count = track_count;
+    config->time_sig_count = time_sig_count;
+    config->time_sig_unit = time_sig_unit;
+    config->tempo = bpm;
+    printf("Track Count: %d\nTime Signature: %d/%d\n", track_count, time_sig_count, time_sig_unit);
+    printf("Tempo: %d BPM\n", bpm);
+}
+
