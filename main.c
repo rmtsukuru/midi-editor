@@ -4,6 +4,7 @@
 #include "src/file_input.h"
 #include "src/file_output.h"
 #include "src/output.h"
+#include "src/util.h"
 
 int display_hex_contents(char* filename) {
     FILE* file = fopen(filename, "rb");
@@ -66,7 +67,7 @@ int open_song_file() {
     FILE* file = fopen(filename, "r");
 
     if (file == NULL) {
-        printf("Could not open file for writing; most likely invalid filename.\n");
+        printf("Could not open file for writing; check that filename is valid.\n");
         return -1;
     }
 
@@ -76,7 +77,6 @@ int open_song_file() {
 }
 
 int main(int argc, char** argv) {
-    char buffer[100];
     if (argc > 2) {
         return display_hex_contents(argv[1]);
     } else if (argc > 1) {
@@ -84,12 +84,10 @@ int main(int argc, char** argv) {
     }
 
     printf("No MIDI file provided. Create new file? [Yn]\n>");
-    fgets(buffer, sizeof(buffer), stdin);
-    char selection = buffer[0];
+    char selection = getcin();
     if (selection == 'n' || selection == 'N') {
         printf("Load song file for viewing? [Yn]\n>");
-        fgets(buffer, sizeof(buffer), stdin);
-        selection = buffer[0];
+        selection = getcin();
         if (selection == 'n' || selection == 'N') {
             return 0;
         }

@@ -1,4 +1,6 @@
+#include <stdio.h>
 
+#include "config.h"
 #include "util.h"
 
 // Bug fixed. Remember to use unsigned char for your bytes, kids!
@@ -16,5 +18,11 @@ void write_bytes(byte* bytes, int value, int len) {
         int offset = len - 1 - i;
         bytes[i] = value << (8 * offset);
     }
+}
+
+char getcin() {
+    char buffer[MAX_LINE_LENGTH];
+    fgets(buffer, sizeof(buffer), stdin);
+    return buffer[0];
 }
 
