@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "config.h"
 #include "util.h"
 #include "file_input.h"
 
@@ -241,15 +242,36 @@ void load_midi_file(FILE* file, MidiFile* contents) {
 }
 
 void load_song_file(FILE* file, MidiSong* contents) {
-    int track_count, time_sig_count, time_sig_unit, bpm;
-    fscanf(file, "%i %i/%i %i\n", &track_count, &time_sig_count, &time_sig_unit, &bpm);
+    int track_count, time_sig_count, time_sig_unit, tempo;
+    fscanf(file, "%i %i/%i %i\n", &track_count, &time_sig_count, &time_sig_unit, &tempo);
 
     MidiConfig* config = &contents->config;
     config->track_count = track_count;
     config->time_sig_count = time_sig_count;
     config->time_sig_unit = time_sig_unit;
-    config->tempo = bpm;
-    printf("Track Count: %d\nTime Signature: %d/%d\n", track_count, time_sig_count, time_sig_unit);
-    printf("Tempo: %d BPM\n", bpm);
+    config->tempo = tempo;
+
+    for (int i = 0; i < track_count; i++) {
+        SongTrack* track = &contents->tracks[i];
+        byte instrument;
+        int octave;
+        fscanf(file, "%i-%i: ", &instrument, &octave);
+        track->instrument = instrument;
+        char line[MAX_TRACK_LINE_LENGTH];
+        fgets(line, sizeof(line), file);
+        SongEvent* event = track->notes;
+        int n = 0;
+        for (int c = 0; c < sizeof(line) && line[c] != '\0'; c++) {
+            if (line[c] >= 'A' || line[c] <= 'G') {
+                event->type = NOTE;
+                int value = 60; // TODO update this to load dynamically
+                Note note = {value, QUARTER, false};
+                event->data.note = note;
+                n++;
+            }
+        }
+        // TODO check second line to get note length; for now it just assumes quarter note by default
+        track->note_count = n;
+    }
 }
 

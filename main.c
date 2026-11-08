@@ -73,6 +73,10 @@ int open_song_file() {
 
     MidiSong song_data;
     load_song_file(file, &song_data);
+    MidiConfig* config = &song_data.config;
+    printf("Track Count: %d\n", config->track_count);
+    printf("Time Signature: %d/%d\n", config->time_sig_count, config->time_sig_unit);
+    printf("Tempo: %d BPM\n", config->tempo);
     return 0;
 }
 

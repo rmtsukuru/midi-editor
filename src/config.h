@@ -7,4 +7,5 @@
 #define MAX_CHORD_NOTES 7
 
 #define MAX_LINE_LENGTH 100
+#define MAX_TRACK_LINE_LENGTH 300
 
