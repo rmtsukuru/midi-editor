@@ -82,7 +82,8 @@ int open_song_file() {
     printf("Track 1 Instrument: %s\n", get_instrument_name(track->instrument));
     for (int i = 0; i < track->note_count; i++) {
         if (track->notes[i].type == NOTE) {
-            printf("%s ", get_note_name(track->notes[i].data.note.value));
+            printf("%s", get_note_name(track->notes[i].data.note.value));
+            printf("%c ", get_frequency_name(track->notes[i].data.note.frequency)[0]);
         }
     }
     printf("\n");

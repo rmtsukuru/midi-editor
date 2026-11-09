@@ -258,19 +258,59 @@ void load_song_file(FILE* file, MidiSong* contents) {
         fscanf(file, "%i-%i: ", &instrument, &octave);
         track->instrument = instrument;
         char line[MAX_TRACK_LINE_LENGTH];
+        char line2[MAX_TRACK_LINE_LENGTH];
         fgets(line, sizeof(line), file);
-        SongEvent* event = track->notes;
+        fgets(line2, sizeof(line), file);
+        SongEvent* notes = track->notes;
+        int starting_note = 60; // Start on C4, middle C
+        if (octave < 4) {
+            starting_note -= 12 * (4 - octave);
+        } else if (octave > 4) {
+            starting_note += 12 * (octave - 4);
+        }
         int n = 0;
         for (int c = 0; c < sizeof(line) && line[c] != '\0'; c++) {
-            if (line[c] >= 'A' || line[c] <= 'G') {
+            if (line[c] >= 'A' && line[c] <= 'G') {
+                SongEvent* event = &notes[n];
                 event->type = NOTE;
-                int value = 60; // TODO update this to load dynamically
-                Note note = {value, QUARTER, false};
+                int value = starting_note; // Start on C of octave
+                // TODO add support for accidentals
+                // Also maybe refactor this into a parsing helper function
+                if (line[c] == 'D') {
+                    value += 2;
+                } else if (line[c] == 'E') {
+                    value += 4;
+                } else if (line[c] == 'F') {
+                    value += 5;
+                } else if (line[c] == 'G') {
+                    value += 7;
+                } else if (line[c] == 'A') {
+                    value += 9;
+                } else if (line[c] == 'B') {
+                    value += 11;
+                }
+                int c2 = 0;
+                while (line2[c2] == ' ' || line2[c2] == '\t') {
+                    c2++;
+                }
+                Frequency frequency;
+                if (line2[c2] == 'w') {
+                    frequency = WHOLE;
+                } else if (line2[c2] == 'h') {
+                    frequency = HALF;
+                } else if (line2[c2] == 'q') {
+                    frequency = QUARTER;
+                } else if (line2[c2] == 'e') {
+                    frequency = EIGHTH;
+                } else if (line2[c2] == 's') {
+                    frequency = SIXTEENTH;
+                }
+                // TODO add support for other (less common) note lengths
+                Note note = {value, frequency, false};
                 event->data.note = note;
                 n++;
             }
         }
-        // TODO check second line to get note length; for now it just assumes quarter note by default
         track->note_count = n;
     }
 }

@@ -141,6 +141,24 @@ char* get_note_name(byte note_number) {
     return notes[note_number];
 }
 
+char* frequencies[] = {
+    "Sixty Fourth Note",
+    "Thirty Second Note",
+    "Sixteenth Note",
+    "Eighth Note",
+    "Quarter Note",
+    "Half Note",
+    "Whole Note",
+    "Double Note",
+    "Triple Note",
+    "Quadruple Note"
+};
+
+char* get_frequency_name(Frequency freq) {
+    byte index = (byte) freq;
+    return frequencies[index];
+}
+
 // MIDI instruments in order by program number
 char* instruments[] = {
     "Grand Piano",          // 0, Piano

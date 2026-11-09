@@ -5,6 +5,8 @@
 
 char* get_note_name(byte note_number);
 
+char* get_frequency_name(Frequency freq);
+
 char* get_instrument_name(byte program_number);
 
 void load_default_midi_data(MidiFile* contents);
