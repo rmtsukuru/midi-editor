@@ -3,6 +3,7 @@
 #include "src/struct.h"
 #include "src/file_input.h"
 #include "src/file_output.h"
+#include "src/music.h"
 #include "src/output.h"
 #include "src/util.h"
 
@@ -77,6 +78,14 @@ int open_song_file() {
     printf("Track Count: %d\n", config->track_count);
     printf("Time Signature: %d/%d\n", config->time_sig_count, config->time_sig_unit);
     printf("Tempo: %d BPM\n", config->tempo);
+    SongTrack* track = &song_data.tracks[0];
+    printf("Track 1 Instrument: %s\n", get_instrument_name(track->instrument));
+    for (int i = 0; i < track->note_count; i++) {
+        if (track->notes[i].type == NOTE) {
+            printf("%s ", get_note_name(track->notes[i].data.note.value));
+        }
+    }
+    printf("\n");
     return 0;
 }
 
