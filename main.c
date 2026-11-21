@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "src/struct.h"
 #include "src/file_input.h"
@@ -61,6 +62,8 @@ int create_midi_file() {
     return 0;
 }
 
+// TODO refactor this so things are organized better
+// probably need to clean up music.c significantly
 int open_song_file() {
     printf("What is the name for this file?\n>");
     char filename[100];
@@ -91,7 +94,7 @@ int open_song_file() {
 }
 
 int main(int argc, char** argv) {
-    if (argc > 2) {
+    if (argc > 2 && strcmp(argv[2], "--hex") == 0) {
         return display_hex_contents(argv[1]);
     } else if (argc > 1) {
         return display_midi_file(argv[1]);
